@@ -1,0 +1,7 @@
+# Runtime (Milestone 1)
+streamlit>=1.40,<2          # UI
+pydantic>=2.6,<3            # schemas + validation
+python-dotenv>=1.0          # load optional .env settings
+
+# Development
+pytest>=8.0

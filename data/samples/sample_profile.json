@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "profile_version": 1,
+  "is_sample": true,
+  "contact": {
+    "full_name": "Asha Example (FICTIONAL SAMPLE)",
+    "email": "asha.example@example.com",
+    "phone": "+91-00000-00000",
+    "location": "Pune, India",
+    "links": [
+      {"id": "lnk-sample01", "label": "GitHub", "url": "https://github.com/example-user"}
+    ]
+  },
+  "headline": "Machine Learning Engineer (fictional sample data)",
+  "summary": "FICTIONAL SAMPLE PROFILE for testing only. Machine learning engineer who has built NLP classification services and retrieval-based question answering prototypes in Python.",
+  "experience": [
+    {
+      "id": "exp-sample01",
+      "employer": "Northwind Analytics (fictional)",
+      "title": "Machine Learning Engineer",
+      "location": "Pune, India",
+      "employment_type": "Full-time",
+      "start_date": "2022-07",
+      "end_date": null,
+      "description": "Fictional role used for demos and tests.",
+      "skills": ["Python", "PyTorch", "FastAPI", "Docker"],
+      "bullets": [
+        {
+          "id": "bul-sample01",
+          "text": "Built a text classification service in PyTorch that routes customer support tickets to 12 queues.",
+          "skills": ["Python", "PyTorch", "NLP"],
+          "source_note": "Fictional sample",
+          "verified_metrics": [{"label": "number of queues", "value": "12", "source_note": "Fictional sample"}]
+        },
+        {
+          "id": "bul-sample02",
+          "text": "Packaged model inference as a FastAPI service deployed with Docker.",
+          "skills": ["FastAPI", "Docker"],
+          "source_note": "Fictional sample",
+          "verified_metrics": []
+        }
+      ],
+      "source_note": "Fictional sample"
+    },
+    {
+      "id": "exp-sample02",
+      "employer": "Contoso Data Labs (fictional)",
+      "title": "Data Analyst",
+      "location": "Mumbai, India",
+      "employment_type": "Full-time",
+      "start_date": "2020-06",
+      "end_date": "2022-06",
+      "description": "",
+      "skills": ["SQL", "Python"],
+      "bullets": [
+        {
+          "id": "bul-sample03",
+          "text": "Wrote SQL reports and Python notebooks for weekly sales analysis.",
+          "skills": ["SQL", "Python"],
+          "source_note": "Fictional sample",
+          "verified_metrics": []
+        }
+      ],
+      "source_note": "Fictional sample"
+    }
+  ],
+  "projects": [
+    {
+      "id": "prj-sample01",
+      "name": "Document Q&A Prototype (fictional)",
+      "role": "Sole developer",
+      "description": "Retrieval-augmented question answering over internal PDFs.",
+      "url": "",
+      "related_experience_id": "exp-sample01",
+      "start_date": "2023-09",
+      "end_date": "2023-12",
+      "skills": ["Python", "LangChain", "RAG"],
+      "bullets": [
+        {
+          "id": "bul-sample04",
+          "text": "Implemented retrieval-augmented generation over PDF documents using LangChain and a vector store.",
+          "skills": ["LangChain", "RAG", "Python"],
+          "source_note": "Fictional sample",
+          "verified_metrics": []
+        }
+      ],
+      "source_note": "Fictional sample"
+    }
+  ],
+  "skills": [
+    {"id": "skl-python", "name": "Python", "category": "language", "aliases": [], "evidence_ids": ["bul-sample01", "bul-sample03", "bul-sample04"]},
+    {"id": "skl-pytorch", "name": "PyTorch", "category": "framework", "aliases": [], "evidence_ids": ["bul-sample01"]},
+    {"id": "skl-fastapi", "name": "FastAPI", "category": "framework", "aliases": [], "evidence_ids": ["bul-sample02"]},
+    {"id": "skl-docker", "name": "Docker", "category": "tool", "aliases": [], "evidence_ids": ["bul-sample02"]},
+    {"id": "skl-sql", "name": "SQL", "category": "language", "aliases": [], "evidence_ids": ["bul-sample03"]},
+    {"id": "skl-nlp", "name": "NLP", "category": "concept", "aliases": ["Natural Language Processing"], "evidence_ids": ["bul-sample01"]},
+    {"id": "skl-langchain", "name": "LangChain", "category": "framework", "aliases": [], "evidence_ids": ["bul-sample04"]},
+    {"id": "skl-rag", "name": "RAG", "category": "concept", "aliases": ["Retrieval-Augmented Generation"], "evidence_ids": ["bul-sample04", "prj-sample01"]}
+  ],
+  "education": [
+    {
+      "id": "edu-sample01",
+      "institution": "Example Institute of Technology (fictional)",
+      "degree": "B.Tech",
+      "field_of_study": "Computer Science",
+      "location": "Pune, India",
+      "grade": "",
+      "start_date": "2016-08",
+      "end_date": "2020-05",
+      "source_note": "Fictional sample"
+    }
+  ],
+  "certifications": [],
+  "achievements": []
+}

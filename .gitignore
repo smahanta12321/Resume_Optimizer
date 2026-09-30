@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+# Personal data and generated files stay local
+data/*
+!data/.gitkeep
+!data/samples/
+output/*
+!output/.gitkeep
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
