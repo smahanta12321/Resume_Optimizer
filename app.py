@@ -8,7 +8,7 @@ from __future__ import annotations
 import streamlit as st
 
 from src.config import configure_logging, get_settings
-from src.ui.pages import dashboard, master_profile, resume_library
+from src.ui.pages import dashboard, jd_analysis, job_import, master_profile, resume_library
 
 configure_logging(get_settings().log_level)
 
@@ -18,6 +18,8 @@ pages = [
     st.Page(dashboard.render, title="Dashboard", icon="🏠", url_path="dashboard", default=True),
     st.Page(master_profile.render, title="Master Profile", icon="👤", url_path="profile"),
     st.Page(resume_library.render, title="Resume Library", icon="📚", url_path="library"),
+    st.Page(job_import.render, title="Job Import", icon="📥", url_path="jobs"),
+    st.Page(jd_analysis.render, title="JD Analysis", icon="🔎", url_path="analysis"),
 ]
 
 st.navigation(pages).run()

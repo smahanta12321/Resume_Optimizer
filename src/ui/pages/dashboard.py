@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import streamlit as st
 
+from src.persistence.job_store import JobStoreError
 from src.persistence.profile_store import ProfileStoreError
 from src.services.profile_service import profile_warnings
-from src.ui.state import get_store, sample_banner, show_flashes
+from src.ui.state import get_job_store, get_store, sample_banner, show_flashes
 
 
 def render() -> None:
@@ -50,11 +51,29 @@ def render() -> None:
     st.subheader("Role profiles")
     st.write(", ".join(r.name for r in roles) if roles else "None yet — create them in Resume Library.")
 
+    st.subheader("Jobs")
+    try:
+        jobs = get_job_store().list()
+    except JobStoreError as exc:
+        st.error(f"Saved jobs could not be loaded. {exc}")
+        jobs = []
+    if jobs:
+        try:
+            analyzed = len(get_job_store().analysis_ids())
+        except JobStoreError:
+            analyzed = 0
+        st.write(f"{len(jobs)} saved job(s), {analyzed} analyzed. Latest: **{jobs[0].display_name}** "
+                 f"({jobs[0].imported_at:%Y-%m-%d}).")
+    else:
+        st.write("None yet. Import a job description on the Job Import page.")
+
     st.subheader("Coming next")
     st.markdown(
-        "- Job import (paste / file / URL) and JD review\n"
         "- Evidence-based match report\n"
         "- Tailored draft, approval, and DOCX/PDF export\n"
         "- Application tracker and settings"
     )
-    st.caption("Privacy: all data is stored locally in the configured data folder. No LLM provider is used yet.")
+    st.caption(
+        "Privacy: all data is stored locally in the configured data folder. No LLM provider is used yet. "
+        "URL import contacts only the job site you enter."
+    )

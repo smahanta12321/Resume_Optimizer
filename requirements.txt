@@ -1,7 +1,10 @@
-# Runtime (Milestone 1)
+# Runtime
 streamlit>=1.40,<2          # UI
 pydantic>=2.6,<3            # schemas + validation
 python-dotenv>=1.0          # load optional .env settings
+requests>=2.31,<3           # best-effort job-page URL import (already a Streamlit dependency)
+pdfplumber>=0.11,<1         # PDF text extraction: JD upload now, export validation later (MIT)
+python-docx>=1.1,<2         # DOCX text extraction: JD upload now, resume rendering later
 
 # Development
 pytest>=8.0

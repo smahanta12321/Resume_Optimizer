@@ -17,6 +17,8 @@ class Settings:
     data_dir: Path
     output_dir: Path
     log_level: str
+    url_import_enabled: bool = True
+    url_timeout_seconds: float = 10.0
 
 
 def get_settings() -> Settings:
@@ -28,7 +30,19 @@ def get_settings() -> Settings:
         data_dir=data_dir,
         output_dir=output_dir,
         log_level=os.getenv("RESUME_OPTIMIZER_LOG_LEVEL", "INFO").upper(),
+        url_import_enabled=os.getenv("RESUME_OPTIMIZER_URL_IMPORT", "on").strip().lower()
+        not in ("0", "off", "false", "no"),
+        url_timeout_seconds=_float_env("RESUME_OPTIMIZER_URL_TIMEOUT", 10.0, low=1.0, high=30.0),
     )
+
+
+def _float_env(name: str, default: float, *, low: float, high: float) -> float:
+    """Read a float env var, falling back to ``default`` if unset/invalid and clamping to [low, high]."""
+    try:
+        value = float(os.getenv(name, "") or default)
+    except ValueError:
+        return default
+    return min(max(value, low), high)
 
 
 def configure_logging(level: str = "INFO") -> None:

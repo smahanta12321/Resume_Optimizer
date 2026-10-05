@@ -1,6 +1,6 @@
 # AI Resume Optimizer — User Manual
 
-**Covers:** Milestone 1 (Master Profile and Resume Library). Job import, matching, resume drafting and export will be added in later versions.
+**Covers:** Milestones 1–3 (Master Profile, Resume Library, Job Import and JD Analysis). Matching, resume drafting and export will be added in later versions.
 
 The app keeps one **master profile**, a verified record of your career. Every tailored resume will be built only from facts in it, so accuracy here matters most.
 
@@ -14,10 +14,10 @@ The app keeps one **master profile**, a verified record of your career. Every ta
    .\.venv\Scripts\Activate.ps1
    streamlit run app.py
    ```
-3. Your browser opens at **http://localhost:8501**. Use the sidebar to switch between **Dashboard**, **Master Profile** and **Resume Library**.
+3. Your browser opens at **http://localhost:8501**. Use the sidebar to switch between **Dashboard**, **Master Profile**, **Resume Library**, **Job Import** and **JD Analysis**.
 4. To stop the app, press `Ctrl+C` in the terminal.
 
-> Everything stays on your computer in the `data/` folder. Nothing is sent online.
+> Everything stays on your computer in the `data/` folder. The only time the app goes online is when you ask it to fetch a job page by URL, and then it contacts only that site.
 
 ---
 
@@ -103,7 +103,70 @@ If you delete something from the master profile, affected role profiles show a w
 
 ---
 
-## 6. Back up, restore and delete
+## 6. Import job descriptions
+
+Open **Job Import**.
+
+### Step 1: bring in the JD
+
+| Tab | How |
+|---|---|
+| **Paste text** | Copy the whole posting from LinkedIn, Naukri or anywhere else, paste it, then click **Review pasted text**. This always works. |
+| **Upload file** | Choose a `.txt`, `.md`, `.pdf` or `.docx` file (up to 5 MB), then click **Extract text**. |
+| **From URL** | Enter the job page address, then click **Fetch page**. |
+
+About **From URL**:
+- The app fetches that one page, follows the site's robots.txt, and stops at sign-in pages or "are you human" checks. It never logs in or works around them.
+- **LinkedIn and Naukri normally refuse automated access, so paste the JD for those.** Company career pages often work.
+- If the fetch fails, a red message explains why. Switch to **Paste text**.
+
+### Step 2: review and save
+
+1. Check or fill in **Job title**, **Company**, **Location**, **Platform** and **Source URL**. Pages that publish structured job data prefill these.
+2. Read any yellow notes. "General page text" means menus or footers may be mixed in, so delete anything that isn't part of the job posting.
+3. Click **Save job**, or **Discard draft** to start over.
+
+### Step 3: handle duplicates
+
+If the job matches one you already saved (same job link, same text, or same company/title/location with nearly the same text), you choose:
+- **Update "…" with this import**: replaces the description and source, and keeps your status and notes.
+- **Save as a separate job**
+- **Back to review**
+
+### Saved jobs
+
+Below the import area, every saved job is listed, newest first. Use **Filter by status** to narrow the list. Expand a job to:
+- **Edit** its title, company, location, status, notes or description, then click **Save changes**.
+- **Delete** it: tick **Confirm delete**, then click **Delete job**.
+
+To remove every job, open **Delete all job records**, type `DELETE`, and confirm.
+
+> Job text is stored as plain text and is never followed as instructions, even if a posting contains text like "ignore previous instructions".
+
+---
+
+## 7. Analyze a job description
+
+Open **JD Analysis** and choose a job from the list. Each job shows its state: *not analyzed*, 📝 *draft*, or ✅ *confirmed*.
+
+1. Click **Analyze job description**. The app reads the JD on your computer using fixed rules. No AI service is used and nothing is sent online.
+2. Check the **Job details**: title, company, location, work arrangement, and minimum/maximum years of experience. Blank title/company/location fields may have been filled in from the JD; check them.
+3. Check the **Requirements** table:
+   - **Category**: skill, experience, education, certification, responsibility, qualification, or domain.
+   - **Importance**: required, preferred, or unspecified. Fix any the parser got wrong.
+   - **Requirement** and **Normalized term**: the standard name used for matching (e.g. "Kubernetes" for "k8s").
+   - **JD excerpt**, **Confidence** and **Origin** are filled in automatically. Low confidence means "check this one". Rows you add or change are marked *user*.
+   - Add a missing requirement in the empty row at the bottom. Delete a wrong one by selecting its row and pressing the delete (trash) icon.
+4. Click **Save review**, then **Confirm analysis**.
+
+Good to know:
+- The analysis describes **the job only**. A skill appearing here does not mean the app thinks you have it. That comparison comes in the match report.
+- If you edit the JD text on **Job Import** later, this page warns that the analysis is out of date. Use **Re-analyze from the JD text** (tick the box first; your edits will be replaced).
+- If the JD contains text addressed to an AI, such as "ignore previous instructions", a warning appears. That text is never followed.
+
+---
+
+## 8. Back up, restore and delete
 
 All of these are on the **Import / export** and **History** tabs:
 
@@ -114,7 +177,7 @@ All of these are on the **Import / export** and **History** tabs:
 
 ---
 
-## 7. Troubleshooting
+## 9. Troubleshooting
 
 | Problem | Fix |
 |---|---|
@@ -126,3 +189,11 @@ All of these are on the **Import / export** and **History** tabs:
 | "Saved profile file is unreadable" | Import your backup JSON, or restore a version from **History**. |
 | App crashes with a numpy/pandas error | You started it without the `.venv`. Activate it first (step 1). |
 | `Activate.ps1` is blocked | Run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once. |
+| "This site does not permit automated access…" or "refuses automated access" | Expected for LinkedIn and Naukri. Paste the JD text instead. |
+| "No selectable text found in this PDF" | The PDF is a scanned image. Copy the text from the original posting and paste it. |
+| "Too little text was found on the page" | The site loads the job with JavaScript. Paste the JD text instead. |
+| "That address points to a local or private network" | Only public web pages can be imported. |
+| "No clear requirements section was found" | The JD has no headings the parser knows. Check each requirement's importance by hand. |
+| "Several different experience ranges were found" | Enter the overall minimum/maximum years yourself. |
+| A skill is missing from the requirements | Add a row at the bottom of the table, or add the skill to your master profile so it is recognized next time. |
+| "Input should be a valid number" when saving | A Min/Max yrs cell contains text. Enter a number or clear the cell. |
