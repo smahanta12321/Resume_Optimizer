@@ -3,8 +3,11 @@ streamlit>=1.40,<2          # UI
 pydantic>=2.6,<3            # schemas + validation
 python-dotenv>=1.0          # load optional .env settings
 requests>=2.31,<3           # best-effort job-page URL import (already a Streamlit dependency)
-pdfplumber>=0.11,<1         # PDF text extraction: JD upload now, export validation later (MIT)
-python-docx>=1.1,<2         # DOCX text extraction: JD upload now, resume rendering later
+pdfplumber>=0.11,<1         # PDF text extraction: JD upload and export validation (MIT)
+python-docx>=1.1,<2         # DOCX: JD upload text extraction and resume export
+reportlab>=4.2,<5           # PDF resume export with selectable, embedded-font text (BSD)
+anthropic>=1,<2             # optional AI rewriting via Anthropic (used only if configured + consented)
+openai>=1.40,<3             # optional AI rewriting via OpenAI (used only if configured + consented)
 
 # Development
 pytest>=8.0

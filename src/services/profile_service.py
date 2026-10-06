@@ -122,7 +122,7 @@ class ProfileWarning:
     message: str
 
 
-def _unverified_numbers(text: str, metric_values: list[str]) -> list[str]:
+def unverified_numbers(text: str, metric_values: list[str]) -> list[str]:
     """Numbers in ``text`` (other than years) that don't appear in any verified metric value."""
     backed = " ".join(metric_values)
     found = []
@@ -158,7 +158,7 @@ def profile_warnings(profile: MasterProfile) -> list[ProfileWarning]:
         if not bullets:
             warnings.append(ProfileWarning(cid, f"{label} has no bullets."))
         for b in bullets:
-            nums = _unverified_numbers(b.text, [m.value for m in b.verified_metrics])
+            nums = unverified_numbers(b.text, [m.value for m in b.verified_metrics])
             if nums:
                 warnings.append(
                     ProfileWarning(

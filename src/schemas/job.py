@@ -7,8 +7,9 @@ HTML. Structured requirements are added by JD analysis (Milestone 3).
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 from enum import Enum
+from typing import Optional
 
 from pydantic import Field, field_validator
 
@@ -31,6 +32,7 @@ class ImportMethod(str, Enum):
     PASTE = "paste"
     FILE = "file"
     URL = "url"
+    EXTENSION = "extension"  # captured by the optional browser extension, then reviewed by the user
 
 
 class JobStatus(str, Enum):
@@ -61,6 +63,9 @@ class Job(_Strict):
     )
     status: JobStatus = JobStatus.SAVED
     notes: str = ""
+    applied_on: Optional[date] = Field(default=None, description="When the user applied (entered by the user)")
+    follow_up_on: Optional[date] = Field(default=None, description="Optional reminder date")
+    resume_version_id: Optional[str] = Field(default=None, description="Resume version used for this application")
     imported_at: datetime = Field(default_factory=utc_now)
     updated_at: datetime = Field(default_factory=utc_now)
 

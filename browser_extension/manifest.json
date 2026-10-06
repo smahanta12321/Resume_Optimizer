@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Resume Optimizer – Capture JD",
+  "short_name": "Capture JD",
+  "version": "0.1.0",
+  "description": "Send a job description you are viewing to your local AI Resume Optimizer, after you review it. Runs only when you click it.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": ["http://127.0.0.1/*"],
+  "action": {
+    "default_title": "Capture this job description",
+    "default_popup": "popup.html"
+  },
+  "options_page": "options.html"
+}

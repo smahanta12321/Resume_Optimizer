@@ -169,3 +169,50 @@ def lookup(name: str, extra: Iterable[SkillTerm] = ()) -> Optional[SkillTerm]:
         if key in {n.casefold() for n in (t.name, *t.aliases)}:
             return t
     return None
+
+
+# Related-but-different terms: (hub, spokes). Evidence of a related term can make a
+# requirement "partial" but never "supported". Relations are hub<->spoke only, so
+# two spokes (e.g. PyTorch and TensorFlow) are never treated as related.
+_RELATED_GROUPS: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("Machine Learning", ("Deep Learning", "scikit-learn", "XGBoost", "LightGBM", "MLOps", "Feature Engineering")),
+    ("Deep Learning", ("PyTorch", "TensorFlow", "Keras", "Transformers")),
+    ("Natural Language Processing", ("spaCy", "NLTK", "Transformers", "Hugging Face", "Large Language Models")),
+    ("Computer Vision", ("OpenCV",)),
+    ("Large Language Models", ("Generative AI", "Prompt Engineering", "Fine-tuning", "Retrieval-Augmented Generation",
+                               "LangChain", "LlamaIndex", "OpenAI API", "Anthropic API", "Hugging Face")),
+    ("Retrieval-Augmented Generation", ("Vector Databases", "Embeddings", "LangChain", "LlamaIndex")),
+    ("Vector Databases", ("FAISS", "Pinecone", "Weaviate", "Chroma", "Milvus", "Elasticsearch")),
+    ("MLOps", ("MLflow", "Kubeflow", "Weights & Biases", "SageMaker", "Vertex AI")),
+    ("SQL", ("PostgreSQL", "MySQL", "BigQuery", "Snowflake", "Redshift")),
+    ("Data Warehousing", ("Snowflake", "BigQuery", "Redshift", "dbt")),
+    ("ETL", ("ELT", "Data Pipelines", "Apache Airflow", "dbt")),
+    ("Apache Spark", ("PySpark", "Databricks", "Hadoop")),
+    ("Docker", ("Kubernetes",)),
+    ("Microservices", ("Docker", "Kubernetes", "REST APIs")),
+    ("REST APIs", ("FastAPI", "Flask", "Django", "Spring Boot")),
+    ("CI/CD", ("Jenkins", "GitHub Actions")),
+    ("AWS", ("SageMaker", "Redshift", "DynamoDB")),
+    ("Google Cloud", ("BigQuery", "Vertex AI")),
+    ("JavaScript", ("TypeScript", "Node.js", "React", "Angular", "Vue.js")),
+    ("Data Visualization", ("Tableau", "Power BI", "Looker")),
+    ("Statistics", ("A/B Testing",)),
+    ("Time Series Analysis", ("Forecasting",)),
+    ("Agile", ("Scrum", "JIRA")),
+    ("Elasticsearch", ("OpenSearch",)),
+)
+
+
+@lru_cache(maxsize=1)
+def _related_map() -> dict[str, frozenset[str]]:
+    rel: dict[str, set[str]] = {}
+    for hub, spokes in _RELATED_GROUPS:
+        for spoke in spokes:
+            rel.setdefault(hub.casefold(), set()).add(spoke)
+            rel.setdefault(spoke.casefold(), set()).add(hub)
+    return {k: frozenset(v) for k, v in rel.items()}
+
+
+def related_terms(name: str) -> frozenset[str]:
+    """Canonical names of terms related to (but not the same as) ``name``."""
+    return _related_map().get(name.casefold(), frozenset())

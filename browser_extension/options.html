@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Resume Optimizer capture: pairing</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <h1>Pair with your local Resume Optimizer</h1>
+  <p class="hint">In the app, open <b>Settings → Browser extension</b>, turn it on, start the receiver
+    (<code>python -m src.extension_receiver</code>), and copy the pairing token here.</p>
+  <form id="pairing">
+    <label>Receiver port <input id="port" type="number" min="1024" max="65535" required></label>
+    <label>Pairing token <input id="token" type="password" autocomplete="off" required></label>
+    <button type="submit">Save</button>
+    <button type="button" id="test">Test connection</button>
+  </form>
+  <div id="status" role="status" aria-live="polite"></div>
+  <script src="options.js"></script>
+</body>
+</html>

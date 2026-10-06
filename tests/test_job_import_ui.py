@@ -149,7 +149,7 @@ def test_url_import_failure_offers_fallback(monkeypatch):
 def test_url_import_can_be_disabled(monkeypatch):
     monkeypatch.setenv("RESUME_OPTIMIZER_URL_IMPORT", "off")
     at = _run()
-    assert any("turned off" in i.value for i in at.info)
+    assert any("switched off" in i.value for i in at.info)
 
 
 def test_edit_and_delete_saved_job(_temp_data_dir):

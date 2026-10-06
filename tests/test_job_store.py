@@ -140,15 +140,16 @@ def test_migrates_v1_database_keeping_jobs(tmp_path):
     conn.close()
     job = _job()
     # Insert a job through raw SQL as a v1 app would have, then let the store migrate.
+    v1_cols = _COLUMNS[:15]
     with sqlite3.connect(path) as conn:
-        conn.execute(f"INSERT INTO jobs ({', '.join(_COLUMNS)}) VALUES ({', '.join('?' for _ in _COLUMNS)})",
-                     _to_row(job))
+        conn.execute(f"INSERT INTO jobs ({', '.join(v1_cols)}) VALUES ({', '.join('?' for _ in v1_cols)})",
+                     _to_row(job)[:15])
     conn.close()
     store = JobStore(tmp_path)
     assert store.get(job.id) == job
     store.save_analysis(_analysis(job.id))
     with sqlite3.connect(path) as conn:
-        assert conn.execute("PRAGMA user_version").fetchone()[0] == 2
+        assert conn.execute("PRAGMA user_version").fetchone()[0] == 7
     conn.close()
 
 
@@ -162,3 +163,61 @@ def test_analysis_validation():
     r = Requirement(text="x")
     with pytest.raises(ValidationError):
         JDAnalysis(job_id="j", jd_hash="h", requirements=[r, r])
+
+
+def test_match_report_roundtrip_and_cascade(job_store):
+    from src.schemas.match import MatchReport, MatchStatus, RequirementMatch
+
+    job = job_store.add(_job())
+    report = MatchReport(job_id=job.id, profile_version=1, analysis_fingerprint="f",
+                         matches=[RequirementMatch(requirement_id="req-1", status=MatchStatus.PARTIAL)])
+    saved = job_store.save_match_report(report)
+    assert job_store.get_match_report(job.id) == saved
+    assert job_store.match_report_ids() == {job.id}
+    job_store.delete(job.id)
+    assert job_store.match_report_ids() == set()
+    with pytest.raises(JobStoreError):
+        job_store.save_match_report(report)
+
+
+def _resume_version(job_id: str):
+    from src.schemas.profile import Contact
+    from src.schemas.resume import ResumeContent, ResumeVersion
+
+    return ResumeVersion(job_id=job_id, profile_version=1, match_profile_version=1, generator="deterministic",
+                         content=ResumeContent(contact=Contact(full_name="Fictional Person")))
+
+
+def test_resume_versions_immutable_and_approval(job_store):
+    job = job_store.add(_job())
+    v1 = job_store.add_resume_version(_resume_version(job.id))
+    v2 = job_store.add_resume_version(_resume_version(job.id).model_copy(update={"parent_id": v1.id}))
+    assert [v.id for v in job_store.list_resume_versions(job.id)] == [v2.id, v1.id]
+    with pytest.raises(sqlite3.IntegrityError):
+        job_store.add_resume_version(v1)  # never overwritten
+    approved = job_store.approve_resume_version(v1.id, "looks right")
+    assert approved.approved_at is not None and approved.approval_note == "looks right"
+    assert approved.content == v1.content
+    with pytest.raises(JobStoreError):
+        job_store.approve_resume_version(v1.id)  # already approved
+    assert job_store.resume_counts() == {job.id: (2, 1)}
+    job_store.delete(job.id)
+    assert job_store.get_resume_version(v1.id) is None
+
+
+def test_added_version_cannot_arrive_pre_approved(job_store):
+    from src.schemas.profile import utc_now
+
+    job = job_store.add(_job())
+    v = job_store.add_resume_version(_resume_version(job.id).model_copy(update={"approved_at": utc_now()}))
+    assert job_store.get_resume_version(v.id).approved_at is None
+
+
+def test_tracker_fields_roundtrip(job_store):
+    from datetime import date
+
+    job = job_store.add(_job(applied_on=date(2026, 10, 1), follow_up_on=date(2026, 10, 8),
+                             resume_version_id="res-12345678"))
+    got = job_store.get(job.id)
+    assert (got.applied_on, got.follow_up_on, got.resume_version_id) == (date(2026, 10, 1), date(2026, 10, 8),
+                                                                         "res-12345678")

@@ -7,6 +7,7 @@ import streamlit as st
 from src.persistence.job_store import JobStoreError
 from src.persistence.profile_store import ProfileStoreError
 from src.services.profile_service import profile_warnings
+from src.services.tracker_service import follow_ups_due
 from src.ui.state import get_job_store, get_store, sample_banner, show_flashes
 
 
@@ -60,20 +61,24 @@ def render() -> None:
     if jobs:
         try:
             analyzed = len(get_job_store().analysis_ids())
+            matched = len(get_job_store().match_report_ids())
+            approved = sum(1 for _, (_, ok) in get_job_store().resume_counts().items() if ok)
+            exported = len(get_job_store().export_counts())
         except JobStoreError:
-            analyzed = 0
-        st.write(f"{len(jobs)} saved job(s), {analyzed} analyzed. Latest: **{jobs[0].display_name}** "
+            analyzed = matched = approved = exported = 0
+        st.write(f"{len(jobs)} saved job(s), {analyzed} analyzed, {matched} matched, "
+                 f"{approved} with an approved resume, {exported} exported. "
+                 f"Latest: **{jobs[0].display_name}** "
                  f"({jobs[0].imported_at:%Y-%m-%d}).")
     else:
         st.write("None yet. Import a job description on the Job Import page.")
 
-    st.subheader("Coming next")
-    st.markdown(
-        "- Evidence-based match report\n"
-        "- Tailored draft, approval, and DOCX/PDF export\n"
-        "- Application tracker and settings"
-    )
+    due = follow_ups_due(jobs)
+    if due:
+        st.warning("Follow-ups due: " + "; ".join(f"**{j.display_name}** ({j.follow_up_on:%Y-%m-%d})" for j in due)
+                   + ". See **Application Tracker**.")
     st.caption(
-        "Privacy: all data is stored locally in the configured data folder. No LLM provider is used yet. "
-        "URL import contacts only the job site you enter."
+        "Privacy: all data is stored locally in the configured data folder. AI rewriting is off unless you "
+        "configure a provider and consent per draft. URL import contacts only the job site you enter. "
+        "See **Settings** for local-only mode, data export and deletion."
     )

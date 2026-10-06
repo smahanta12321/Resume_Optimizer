@@ -1,6 +1,6 @@
 # AI Resume Optimizer — User Manual
 
-**Covers:** Milestones 1–3 (Master Profile, Resume Library, Job Import and JD Analysis). Matching, resume drafting and export will be added in later versions.
+**Covers:** Milestones 1–8: Master Profile, Resume Library, Job Import, JD Analysis, Match Report, Resume Builder with DOCX/PDF export, Application Tracker, Settings, and the optional browser extension.
 
 The app keeps one **master profile**, a verified record of your career. Every tailored resume will be built only from facts in it, so accuracy here matters most.
 
@@ -14,10 +14,10 @@ The app keeps one **master profile**, a verified record of your career. Every ta
    .\.venv\Scripts\Activate.ps1
    streamlit run app.py
    ```
-3. Your browser opens at **http://localhost:8501**. Use the sidebar to switch between **Dashboard**, **Master Profile**, **Resume Library**, **Job Import** and **JD Analysis**.
+3. Your browser opens at **http://localhost:8501**. Use the sidebar to switch between **Dashboard**, **Master Profile**, **Resume Library**, **Job Import**, **JD Analysis**, **Match Report**, **Resume Builder**, **Application Tracker** and **Settings**.
 4. To stop the app, press `Ctrl+C` in the terminal.
 
-> Everything stays on your computer in the `data/` folder. The only time the app goes online is when you ask it to fetch a job page by URL, and then it contacts only that site.
+> Everything stays on your computer in the `data/` folder. The app goes online only when you ask it to: to fetch a job page by URL, or (if you set it up) to improve resume wording with AI after you've seen and agreed to what is sent.
 
 ---
 
@@ -166,7 +166,137 @@ Good to know:
 
 ---
 
-## 8. Back up, restore and delete
+## 8. Match a job against your profile
+
+Open **Match Report** and choose a job. You need a master profile and a **confirmed** JD analysis.
+
+1. Click **Run matching**. It runs on your computer with fixed rules.
+2. Read the summary:
+   - **Required / Preferred coverage**: how much of each group your recorded evidence addresses. Open **How these numbers are calculated** for the exact formula. This is *not* a chance of getting hired or an ATS score.
+   - **Your judgements**: how many results you have corrected.
+3. Read the **Requirements** table. Filter by status or category if it's long.
+   - ✅ **supported**: your evidence shows it. **Evidence** lists the items.
+   - 🟡 **partial**: something related is there, but not exactly this. For example, you list the skill but no job or project shows it, or you used a *related* tool. **Why** explains which.
+   - ⬜ **not documented**: nothing in your profile shows it.
+   - **Match** shows how it was found: *exact*, *alias* (another name you recorded, like k8s), *related*, *text_overlap* (similar wording, so check it), or *computed* (from dates or degree level).
+4. **Correct a result** if the matcher got something wrong. Pick the requirement, choose a status, select the evidence items that prove it, add a note, and click **Save my judgement**. "Supported" and "partial" need at least one evidence item. If the proof isn't in your profile yet, add it there first. **Clear my judgement** undoes it.
+5. Check **Gaps**: required or preferred items with no evidence. If you really have that experience, add it to your master profile and re-run. If you don't, it stays off your resume.
+6. **Recommendations** suggest which role profile and projects cover the most matched requirements.
+
+If you edit your profile or the JD analysis afterwards, the page says the report is out of date. Click **Re-run matching**. Your judgements are kept.
+
+---
+
+## 9. Build and approve a tailored resume
+
+Open **Resume Builder** and choose a job. It needs an up-to-date match report.
+
+### Generate a draft
+1. Open **➕ Generate a new version**.
+2. **Base role profile**: the best fit is preselected and marked *recommended*. You can pick another, or *None*.
+3. **Target length**: 1 or 2 pages.
+4. Click **Generate draft**. The app picks your most relevant bullets for this job and copies them **word for word** from your profile. Job titles, employers and dates always come from your profile.
+
+### Optional: improve the wording with AI
+This appears only if AI rewriting is set up (see the README).
+1. Tick **Improve wording with AI**.
+2. Open **Exactly what will be sent** and read it. Your name, contact details and employer names are never included.
+3. Tick **I agree to send this content…**, then **Generate draft**.
+
+Every AI rewrite is checked. Any that adds a number, skill or tool your profile doesn't show is thrown away and your original wording is kept; **Changes & evidence** tells you which. If the AI service fails, you still get a draft with your original wording.
+
+### Review
+- **Preview**: the resume text.
+- **Changes & evidence**: for every line, the original, the final wording, where it came from (*from profile*, *AI rewrite (checked)*, *your edit*) and its evidence. **Left out** explains everything that was dropped and why, for example "contains unverified number(s)".
+
+### Edit
+On **Edit**, change bullet wording, untick **Include** to drop a bullet, or rewrite the summary. Click **Save as new version**. The previous version is kept unchanged. To change a title, date or degree, edit your master profile and generate again.
+
+### Validate and approve
+On **Validate & approve**:
+- Red **errors** must be fixed first. Examples: a number or skill your profile doesn't show, or more years of experience than your dated roles add up to.
+- Yellow **warnings** need a careful read, for example new names or stronger wording than your profile uses.
+- When you're satisfied, tick **I have read this resume… everything in it is accurate**, optionally add a note, and click **Approve this version**.
+
+Approved versions can't be changed. Edit to make a new version instead.
+
+### Export DOCX and PDF
+1. Open the **Export** tab of an approved version.
+2. Click **Export DOCX and PDF**. The app creates both files and checks them.
+3. Read the checks:
+   - ✅ passed.
+   - ⚠️ review before sending. For example, "Fits target length" means the PDF is longer than your 1- or 2-page target. The app never shrinks text to fit; remove a bullet on **Edit**, or generate with the 2-page target.
+   - ❌ don't send these files. For example, content missing from the file, or text too small.
+4. Click **Download DOCX** or **Download PDF**. The files are also saved in the `output` folder, under the job's ID.
+
+Use the PDF when an application accepts it (layout is fixed). Use the DOCX when a site asks for Word, or if you want to make your own final tweaks. Changes you make in Word aren't tracked by the app.
+
+To change the paper size (A4/Letter) or template (Classic/Compact), use the **Settings** page, then click **Export again**.
+
+---
+
+## 10. Track your applications
+
+Open **Application Tracker**.
+
+1. The counters show how many jobs are *saved*, *applied*, *interviewing*, at *offer*, or *rejected*. A yellow banner lists follow-ups that are due.
+2. Narrow the table with **Status**, **Platform**, **Search** or **Follow-up due**.
+3. Under **Update an application**, pick a job and set:
+   - **Status**. If you mark it *applied* without a date, today's date is filled in; change it if you applied earlier.
+   - **Applied on** and **Follow up on**. The follow-up can't be before the applied date.
+   - **Resume used**: the version you actually sent. Approved versions are listed first.
+   - **Notes**, then click **Save**.
+4. **Download DOCX/PDF used** gets the exact files you sent for that job.
+5. **Download CSV of these jobs** saves the filtered table for a spreadsheet. Tick **Include JD text** to add the descriptions.
+6. **Possible duplicates** appears if two jobs look like the same posting. Choose which to **Keep**, read what the other record's deletion will remove, tick **Merge these two**, and click **Merge**.
+7. **Delete this job** removes the job and everything made from it, including exported files.
+
+---
+
+## 11. Settings, privacy and your data
+
+Open **Settings**.
+
+- **Local-only mode**: when on, the app never goes online. URL import and AI rewriting are switched off.
+- **AI rewriting**: choose *None*, *Anthropic* or *OpenAI*, and optionally a model. API keys are never typed into the app. Put them in your `.env` file (`ANTHROPIC_API_KEY=…` or `OPENAI_API_KEY=…`) and restart. The page only says whether a key is *detected*.
+- **Template** (*Classic* or *Compact*) and **Paper size** (*A4* or *Letter*) apply to your next export.
+- **Allow best-effort import from a job URL** turns URL import on or off.
+- Click **Save settings**. A greyed-out field is set in your `.env` file. Change it there and restart.
+
+**What is stored and what is sent** lists exactly where your data lives and when anything leaves your computer.
+
+**Your data**:
+- **Prepare data export**, then **Download all my data (.zip)**: everything, optionally with exported files. The archive contains personal data, so keep it private.
+- **Delete everything**: type `DELETE EVERYTHING` and click **Delete all my data**. This removes your profile and all its versions, role profiles, jobs, resumes, exported files and settings. It can't be undone.
+
+---
+
+## 12. Optional: capture JDs with the browser extension
+
+Instead of copy-pasting, you can send a job description from Chrome or Edge with one click. It only reads the page you're looking at, only when you click it, and only after you confirm.
+
+**Set up once**
+1. **Settings → Browser extension**: turn on **Accept job descriptions from the browser extension** and click **Save settings**.
+2. Open a second PowerShell window in `D:\Resume_Optimizer` and run:
+   ```powershell
+   .\.venv\Scripts\Activate.ps1
+   python -m src.extension_receiver
+   ```
+   Leave it running while you capture. Close it with `Ctrl+C`.
+3. In Chrome, go to `chrome://extensions` (Edge: `edge://extensions`), switch on **Developer mode**, click **Load unpacked**, and pick the `browser_extension` folder.
+4. Back in **Settings**, tick **Show pairing token** and copy it. In the extension's **Pairing settings**, paste the token, check the port (default 8765), click **Save**, then **Test connection**.
+
+**Capture a job**
+1. Open the job posting. Expand "see more" if there is one, and select the job description text. Selecting gives the cleanest result.
+2. Click the extension. Check **Source**, fix the title, company or location, and delete anything that isn't part of the posting.
+3. Tick **I reviewed this text…** and click **Send for review**.
+4. In the app, open **Job Import → From browser**, then **Review and save** (or **Discard**).
+
+If the extension says it **couldn't reach Resume Optimizer**, the receiver isn't running, the port differs, or the extension is switched off in Settings. **Generate a new token** in Settings un-pairs the extension; paste the new token into it.
+
+---
+
+## 13. Back up, restore and delete
 
 All of these are on the **Import / export** and **History** tabs:
 
@@ -177,7 +307,7 @@ All of these are on the **Import / export** and **History** tabs:
 
 ---
 
-## 9. Troubleshooting
+## 14. Troubleshooting
 
 | Problem | Fix |
 |---|---|
@@ -197,3 +327,22 @@ All of these are on the **Import / export** and **History** tabs:
 | "Several different experience ranges were found" | Enter the overall minimum/maximum years yourself. |
 | A skill is missing from the requirements | Add a row at the bottom of the table, or add the skill to your master profile so it is recognized next time. |
 | "Input should be a valid number" when saving | A Min/Max yrs cell contains text. Enter a number or clear the cell. |
+| "Confirm this job's analysis…" on Match Report | Open **JD Analysis**, review the job, and click **Confirm analysis**. |
+| "must cite at least one evidence item" | Select the evidence that proves it, or add that evidence to your master profile first. |
+| A skill you have shows "partial: in your skills list, but no evidence" | On **Master Profile → Skills**, link the skill to the jobs, projects or bullets that show it, or mention it in a bullet. |
+| "This report is out of date" | Your profile or the JD analysis changed. Click **Re-run matching**. |
+| "AI rewriting is off" on Resume Builder | Choose a provider on **Settings** and add its API key to `.env` (then restart). Check that local-only mode is off. Drafts work without AI. |
+| "AI rewriting failed: … rejected the API key" | Check `ANTHROPIC_API_KEY` / `OPENAI_API_KEY`. The draft was saved with your original wording. |
+| A bullet you expected is missing | See **Changes & evidence → Left out**. A common reason is a number without a verified metric; add one on the Master Profile page. |
+| "Adds number(s) not in the source" | Remove the number, or add it as a verified metric in your master profile and generate again. |
+| **Generate draft** is greyed out | The match report is out of date, or AI is ticked but consent isn't. Re-run matching or tick the consent box. |
+| Export says "Approve this version…" | Approve it on **Validate & approve** first. Only approved versions can be exported. |
+| "Fits target length" warning | Remove bullets on **Edit** (new version, approve, export), or generate with the 2-page target. |
+| "Could not write the files" | A previous export is open in Word or a PDF viewer. Close it and click **Export again**. |
+| "The fallback font can't draw: …" | No Arial/DejaVu/Liberation font was found. Set `RESUME_OPTIMIZER_PDF_FONT` (and `_BOLD`) in `.env` to a `.ttf` file. |
+| A Settings field is greyed out | It's set in your `.env` file, which takes priority. Edit or blank that line, then restart the app. |
+| "The follow-up date is before the applied date" | Pick a follow-up date on or after the applied date. |
+| URL import tab says it's unavailable | URL import is switched off, or local-only mode is on. Change it on **Settings**. |
+| Extension: "Couldn't reach Resume Optimizer" | Start `python -m src.extension_receiver`, check the port matches, and that the extension is turned on in **Settings**. |
+| Extension: "Pairing token missing or wrong" | Copy the token again from **Settings** (tick **Show pairing token**) into the extension's Pairing settings. |
+| Extension: "This page can't be captured" | It only works on normal http/https pages, not on browser pages like the new-tab page or PDFs. |

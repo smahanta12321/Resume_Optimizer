@@ -191,7 +191,7 @@ def _review(store: JobStore, job: Job, analysis: JDAnalysis) -> None:
     if c1.button("Confirm analysis", type="primary", disabled=bool(analysis.confirmed_at) or stale,
                  help="Re-analyze first if the JD changed." if stale else None):
         store.save_analysis(analysis.model_copy(update={"confirmed_at": utc_now()}))
-        flash("success", "Analysis confirmed. It will be used for evidence matching.")
+        flash("success", "Analysis confirmed. Next, open **Match Report** to compare it with your profile.")
         st.rerun()
     with c2.expander("Re-analyze from the JD text"):
         st.caption("Replaces the current requirements with a fresh parser draft. Your edits will be lost.")

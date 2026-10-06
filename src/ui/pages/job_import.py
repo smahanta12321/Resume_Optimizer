@@ -21,6 +21,8 @@ from src.services.jd_import_service import (
     merge_import_into,
 )
 from src.services.profile_service import format_validation_error
+from src.services.export_service import delete_job_outputs
+from src.services.tracker_service import delete_job
 from src.services.url_import import UrlImportError, fetch_job_from_url
 from src.ui.state import flash, get_job_store, show_flashes
 
@@ -61,7 +63,7 @@ def render() -> None:
     elif st.session_state.get(DRAFT_KEY):
         _review_form(store, jobs)
     else:
-        _import_tabs()
+        _import_tabs(store)
 
     st.divider()
     _saved_jobs(store, jobs)
@@ -70,9 +72,14 @@ def render() -> None:
 # ---- step 1: import -------------------------------------------------------------
 
 
-def _import_tabs() -> None:
+def _import_tabs(store: JobStore) -> None:
     st.subheader("1. Import a job description")
-    paste, upload, url = st.tabs(["Paste text", "Upload file", "From URL"])
+    try:
+        captures = store.list_captures()
+    except JobStoreError:
+        captures = []
+    browser_label = f"From browser ({len(captures)})" if captures else "From browser"
+    paste, upload, browser, url = st.tabs(["Paste text", "Upload file", browser_label, "From URL"])
 
     with paste:
         text = st.text_area("Job description", height=260, placeholder="Paste the full job posting here…")
@@ -98,10 +105,14 @@ def _import_tabs() -> None:
                 _set_draft(clean, ImportMethod.FILE, notes, source_label=uploaded.name)
                 st.rerun()
 
+    with browser:
+        _browser_inbox(store, captures)
+
     with url:
         settings = get_settings()
         if not settings.url_import_enabled:
-            st.info("URL import is turned off (RESUME_OPTIMIZER_URL_IMPORT=off). Paste or upload the JD instead.")
+            reason = "local-only mode is on" if settings.local_only else "it is switched off"
+            st.info(f"URL import is unavailable because {reason} (see **Settings**). Paste or upload the JD instead.")
             return
         st.caption(
             "Best effort: the app fetches the single public page you enter, respects the site's robots.txt, "
@@ -122,6 +133,43 @@ def _import_tabs() -> None:
                 title=result.title, company=result.company, location=result.location,
             )
             st.rerun()
+
+
+def _browser_inbox(store: JobStore, captures: list) -> None:
+    settings = get_settings()
+    if not settings.extension_enabled and not captures:
+        st.info("The optional browser extension sends a job description you're viewing straight here for review. "
+                "Turn it on and pair it on the **Settings** page; installation steps are in "
+                "`browser_extension/README.md`.")
+        return
+    if not captures:
+        st.caption("Nothing captured yet. Open a job posting in your browser, click the extension, review the text, "
+                   "and send it. It appears here for review.")
+        return
+    st.caption("Captured from pages you were viewing. Nothing becomes a job until you review and save it.")
+    for cap in captures:
+        label = " · ".join(x for x in (cap.title or cap.page_title or "Untitled", cap.company) if x)
+        with st.expander(f"{label}  ·  {cap.received_at:%Y-%m-%d %H:%M} UTC"):
+            if cap.url:
+                st.caption(f"From {cap.url} ({cap.method})")
+            st.text(cap.text[:800] + ("…" if len(cap.text) > 800 else ""))
+            c1, c2 = st.columns(2)
+            if c1.button("Review and save", key=f"cap-review-{cap.id}", type="primary"):
+                try:
+                    clean, notes = check_jd_text(cap.text)
+                except JDImportError as exc:
+                    st.error(str(exc))
+                    continue
+                _set_draft(clean, ImportMethod.EXTENSION, notes,
+                           [f"Captured by the browser extension ({cap.method}) from a page you were viewing. "
+                            "Check it against the original posting."],
+                           source_url=cap.url, title=cap.title, company=cap.company, location=cap.location,
+                           capture_id=cap.id)
+                st.rerun()
+            if c2.button("Discard", key=f"cap-discard-{cap.id}"):
+                store.delete_capture(cap.id)
+                flash("success", "Discarded the capture.")
+                st.rerun()
 
 
 # ---- step 2: review -------------------------------------------------------------
@@ -178,10 +226,17 @@ def _add(store: JobStore, job: Job) -> None:
     except JobStoreError as exc:
         st.error(f"Could not save the job. {exc}")
         return
-    st.session_state.pop(DRAFT_KEY, None)
-    st.session_state.pop(PENDING_KEY, None)
+    _finish_draft(store)
     flash("success", f"Saved **{job.display_name}**. Next, open **JD Analysis** to extract its requirements.")
     st.rerun()
+
+
+def _finish_draft(store: JobStore) -> None:
+    """Clear the draft after a successful save; a capture it came from leaves the inbox now."""
+    draft = st.session_state.pop(DRAFT_KEY, None) or {}
+    st.session_state.pop(PENDING_KEY, None)
+    if draft.get("capture_id"):
+        store.delete_capture(draft["capture_id"])
 
 
 def _duplicate_decision(store: JobStore, jobs: list[Job]) -> None:
@@ -201,8 +256,7 @@ def _duplicate_decision(store: JobStore, jobs: list[Job]) -> None:
         except JobStoreError as exc:
             st.error(f"Could not update the job. {exc}")
             return
-        st.session_state.pop(DRAFT_KEY, None)
-        st.session_state.pop(PENDING_KEY, None)
+        _finish_draft(store)
         flash("success", f"Updated **{target.display_name}**. Its status and notes were kept.")
         st.rerun()
     if c2.button("Save as a separate job"):
@@ -235,13 +289,15 @@ def _saved_jobs(store: JobStore, jobs: list[Job]) -> None:
             _edit_job_form(store, job)
             confirm = st.checkbox("Confirm delete", key=f"del-chk-{job.id}")
             if st.button("Delete job", key=f"del-{job.id}", disabled=not confirm):
-                store.delete(job.id)
-                flash("success", f"Deleted **{job.display_name}**.")
+                delete_job(store, get_settings().output_dir, job.id)
+                flash("success", f"Deleted **{job.display_name}** with its analysis, resumes and exported files.")
                 st.rerun()
 
     with st.expander("Delete all job records"):
         typed = st.text_input("Type DELETE to confirm", key="del-all-jobs-confirm")
         if st.button("Delete all job records", disabled=typed != "DELETE"):
+            for j in jobs:
+                delete_job_outputs(get_settings().output_dir, j.id)
             count = store.delete_all()
             flash("success", f"Deleted {count} job record(s).")
             st.rerun()

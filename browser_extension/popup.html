@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Capture job description</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <h1>Capture job description</h1>
+  <p class="hint">Only this page's visible text is read, and only now. Nothing is sent until you confirm.
+    Tip: select the job description on the page first for the cleanest capture.</p>
+  <div id="status" role="status" aria-live="polite"></div>
+
+  <form id="capture" hidden>
+    <label>Source
+      <select id="source"></select>
+    </label>
+    <div class="row">
+      <label>Job title <input id="title" maxlength="200"></label>
+      <label>Company <input id="company" maxlength="200"></label>
+    </div>
+    <label>Location <input id="location" maxlength="200"></label>
+    <label>Page URL <input id="url" readonly></label>
+    <label>Job description text (edit to remove anything that isn't the posting)
+      <textarea id="text" rows="12"></textarea>
+    </label>
+    <div id="count" class="hint"></div>
+    <label class="check"><input type="checkbox" id="confirmed">
+      I reviewed this text and want to send it to my local Resume Optimizer.</label>
+    <button type="submit" id="send" disabled>Send for review</button>
+  </form>
+
+  <p class="hint"><a href="options.html" target="_blank">Pairing settings</a></p>
+  <script src="capture_logic.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

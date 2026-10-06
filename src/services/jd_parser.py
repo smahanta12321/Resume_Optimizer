@@ -296,7 +296,8 @@ def _excerpt(text: str, limit: int = 300) -> str:
     return text if len(text) <= limit else text[: limit - 1].rstrip() + "…"
 
 
-def _edu_level(text: str) -> str:
+def education_level(text: str) -> str:
+    """Degree level named in ``text``: PhD, Master's, Bachelor's, Diploma, Degree, or ''."""
     for rx, level in _EDU_LEVELS:
         if rx.search(text):
             return level
@@ -326,7 +327,7 @@ def _extract_item(item: _Item, extra: list[SkillTerm], state: _State) -> None:
     if item.section is Section.EDUCATION or _EDU_RE.search(text):
         if _EDU_RE.search(text) or item.section is Section.EDUCATION:
             state.reqs.append(Requirement(
-                text=_excerpt(text, 500), normalized_term=_edu_level(text), category=RequirementCategory.EDUCATION,
+                text=_excerpt(text, 500), normalized_term=education_level(text), category=RequirementCategory.EDUCATION,
                 importance=importance, source_excerpt=_excerpt(text),
                 confidence=0.85 if item.section is Section.EDUCATION else base_conf - 0.1))
             produced_specific = True
