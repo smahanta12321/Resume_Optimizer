@@ -255,6 +255,17 @@ Safeguards:
 - **Receiver:** bound to 127.0.0.1, off unless enabled, and requires a host check, a browser-extension (or non-browser) origin, the pairing token, JSON and size limits, plus schema validation. Request bodies are never logged.
 - **Data handling:** the inbox holds at most 50 items, and an item is removed once you save it as a job or discard it. **Settings → Delete everything** clears the inbox and the pairing token. The token is never included in data exports.
 
+## Optional React frontend
+
+A separate React interface lives in [frontend-react/](frontend-react/). It uses the same data as Streamlit through a small local API, and the Streamlit app keeps working unchanged. You can run both at once.
+
+```bash
+python -m src.api                       # terminal 1: local API on 127.0.0.1:8000, prints a connect link
+cd frontend-react && npm install && npm run dev   # terminal 2: http://localhost:5173
+```
+
+Open the link the API prints (it carries a per-launch session token). The API ([src/api/](src/api/)) only calls the existing services; it holds no business logic of its own. It accepts requests only from this computer, with the right Host header, an allowed origin and the session token. A profile save is refused if the profile changed in another window since you opened it. Setup, features and limitations: [frontend-react/README.md](frontend-react/README.md).
+
 ### Profile rules enforced by the app
 
 - IDs are unique across the profile. Skills may only link to evidence IDs that exist.

@@ -8,6 +8,8 @@ python-docx>=1.1,<2         # DOCX: JD upload text extraction and resume export
 reportlab>=4.2,<5           # PDF resume export with selectable, embedded-font text (BSD)
 anthropic>=1,<2             # optional AI rewriting via Anthropic (used only if configured + consented)
 openai>=1.40,<3             # optional AI rewriting via OpenAI (used only if configured + consented)
+fastapi>=0.115,<1           # optional local API for the React frontend (python -m src.api); 127.0.0.1 only
+uvicorn>=0.30               # serves that API (already installed as a Streamlit dependency)
 
 # Development
 pytest>=8.0
